@@ -57,12 +57,12 @@ df_err[df_err.error == max(df_err.error)]
 
 # Random forest 
 from sklearn.ensemble import RandomForestRegressor
-r_reg = RandomForestRegressor()
-np.mean(cross_val_score(reg, X_train, y_train, scoring='neg_mean_absolute_error'))
+r_reg = RandomForestRegressor(oob_score=True,random_state=0)
+np.mean(cross_val_score(r_reg, X_train, y_train, scoring='neg_mean_absolute_error'))
 
 #Grid Search CV
 from sklearn.model_selection import GridSearchCV
-params = {'n_estimators': range(10, 300, 10), 'max_features':('auto', 'sqrt', 'log2'), 'criterion':('mse', 'mae')}
+params = {'n_estimators': range(10, 300, 10), 'criterion':('mse', 'mae'), 'max_features':('auto', 'sqrt', 'log2')}
 
 gs = GridSearchCV(r_reg, params, scoring='neg_mean_absolute_error')
 
@@ -83,6 +83,18 @@ mean_absolute_error(y_test, tpred_reg)
 mean_absolute_error(y_test, tpred_lss_reg)
 
 mean_absolute_error(y_test, tpred_r_reg)
+
+import pickle
+pickl = {'model': gs.best_estimator_}
+pickle.dump( pickl, open( 'model_file' + ".p", "wb" ) )
+
+file_name = "model_file.p"
+with open(file_name, 'rb') as pickled:
+     data = pickle.load(pickled)
+     model = data['model']
+
+model.predict(X_test.iloc[1,:].values.reshape(1,-1))
+
 
 
 
